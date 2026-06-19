@@ -1,0 +1,195 @@
+import type { Question } from "../types";
+
+/**
+ * Safety — Oregon OSHA. The exam's classic trap lives here: the construction
+ * fall-protection trigger is 6 feet (Oregon lowered it from 10 ft in 2017),
+ * NOT 10 feet, and NOT the 4 ft general-industry trigger.
+ */
+export const safety: Question[] = [
+  {
+    id: "safety-001",
+    domain: "safety",
+    subtopic: "Fall protection trigger (construction)",
+    difficulty: 2,
+    stem: "On a construction site in Oregon, at what height must employees generally be protected from falls to a lower level?",
+    options: ["4 feet", "6 feet", "10 feet", "15 feet"],
+    answerIndex: 1,
+    explanation:
+      "For construction work, Oregon OSHA requires fall protection at 6 feet. Oregon lowered the trigger from 10 ft to 6 ft in 2017 to match the federal standard. The 10-foot answer is outdated, and 4 feet is the GENERAL-INDUSTRY trigger — don't mix them up.",
+    citation: "OAR 437-003-1501 (Div 3/M); cf. 29 CFR 1926.501",
+    tags: ["fall protection", "trap"],
+  },
+  {
+    id: "safety-002",
+    domain: "safety",
+    subtopic: "General industry fall trigger",
+    difficulty: 2,
+    stem: "In general-industry (non-construction) work, the fall-protection trigger height is:",
+    options: ["4 feet", "6 feet", "10 feet", "20 feet"],
+    answerIndex: 0,
+    explanation:
+      "General-industry work (Division 2) requires fall protection at 4 feet, while construction (Division 3) uses 6 feet. The exam likes to test whether you keep the two divisions straight.",
+    citation: "Oregon OSHA Division 2 vs Division 3",
+    tags: ["fall protection"],
+  },
+  {
+    id: "safety-003",
+    domain: "safety",
+    subtopic: "Reporting a fatality",
+    difficulty: 2,
+    stem: "A workplace fatality occurs. Within how many hours must it be reported to Oregon OSHA?",
+    options: ["1 hour", "8 hours", "24 hours", "72 hours"],
+    answerIndex: 1,
+    explanation:
+      "A work-related fatality or catastrophe must be reported to Oregon OSHA within 8 hours. In-patient hospitalizations, amputations, and loss of an eye are reported within 24 hours.",
+    citation: "OAR 437-001-0704 — 8-hour fatality reporting",
+    tags: ["reporting", "deadlines"],
+  },
+  {
+    id: "safety-004",
+    domain: "safety",
+    subtopic: "Reporting hospitalization/amputation",
+    difficulty: 2,
+    stem: "An employee suffers an amputation on the job. Within how many hours must it be reported to Oregon OSHA?",
+    options: ["8 hours", "24 hours", "48 hours", "It need not be reported"],
+    answerIndex: 1,
+    explanation:
+      "In-patient hospitalization, amputation, or loss of an eye must be reported within 24 hours. A fatality or catastrophe is the faster 8-hour deadline.",
+    citation: "OAR 437-001-0704 — 24-hour reporting",
+    tags: ["reporting", "deadlines"],
+  },
+  {
+    id: "safety-005",
+    domain: "safety",
+    subtopic: "Injury recordkeeping",
+    difficulty: 1,
+    stem: "Which form is the OSHA log used to record work-related injuries and illnesses?",
+    options: ["Form 300", "Form W-2", "Form 1099", "Form I-9"],
+    answerIndex: 0,
+    explanation:
+      "The OSHA 300 log records recordable work-related injuries and illnesses; the 300A is the annual summary that gets posted, and the 301 is the individual incident report.",
+    citation: "OAR 437-001-0700 — OSHA 300/300A/301",
+    tags: ["recordkeeping"],
+  },
+  {
+    id: "safety-006",
+    domain: "safety",
+    subtopic: "Small-employer recordkeeping",
+    difficulty: 2,
+    stem: "A contractor had 8 employees all of last year and is in a partially exempt industry. What is generally true about the OSHA 300 log?",
+    options: [
+      "They must keep the 300 log like everyone else",
+      "They may be partially exempt from routinely keeping the 300 log, but must still report fatalities and serious injuries",
+      "They never have to report anything to OSHA",
+      "They must keep the log only if they have a union",
+    ],
+    answerIndex: 1,
+    explanation:
+      "Employers with 10 or fewer employees throughout the prior year (and those in certain low-hazard industries) are partially exempt from routinely maintaining the 300 log — but ALL employers must still report fatalities and serious injuries.",
+    citation: "OAR 437-001-0700 — ≤10 employee partial exemption",
+    tags: ["recordkeeping"],
+  },
+  {
+    id: "safety-007",
+    domain: "safety",
+    subtopic: "Who Oregon OSHA covers",
+    difficulty: 1,
+    stem: "Oregon OSHA operates a state plan that covers:",
+    options: [
+      "Only state government employees",
+      "Private-sector employers plus state and local government",
+      "Only construction employers",
+      "Only employers with 50+ employees",
+    ],
+    answerIndex: 1,
+    explanation:
+      "As an OSHA-approved state plan, Oregon OSHA covers private-sector employers and all state and local government employers. Federal employees and maritime work on navigable waters are outside its jurisdiction.",
+    citation: "Oregon OSHA State Plan",
+    tags: ["coverage"],
+  },
+  {
+    id: "safety-008",
+    domain: "safety",
+    subtopic: "Scaffold competent person",
+    difficulty: 2,
+    stem: "Who must supervise the erection, moving, and dismantling of scaffolds?",
+    options: [
+      "Any employee on site",
+      "A competent person qualified in scaffold work",
+      "The building owner",
+      "An OSHA inspector",
+    ],
+    answerIndex: 1,
+    explanation:
+      "Scaffold erection, alteration, moving, and dismantling must be supervised by a competent person — someone capable of identifying hazards and authorized to correct them. Scaffolding is consistently among the most-cited construction standards.",
+    citation: "29 CFR 1926.451 / Oregon OSHA Div 3",
+    tags: ["scaffolds"],
+  },
+  {
+    id: "safety-009",
+    domain: "safety",
+    subtopic: "Hazard communication",
+    difficulty: 1,
+    stem: "Under the Hazard Communication standard, what must accompany hazardous chemicals on the jobsite?",
+    options: [
+      "Nothing, if employees are experienced",
+      "Safety Data Sheets (SDS) and proper labeling, with employee training",
+      "Only a verbal warning",
+      "A building permit",
+    ],
+    answerIndex: 1,
+    explanation:
+      "HazCom requires Safety Data Sheets (SDS) to be accessible, containers to be labeled, and employees to be trained on the hazards of chemicals they may be exposed to.",
+    citation: "29 CFR 1910.1200 — Hazard Communication",
+    tags: ["hazcom"],
+  },
+  {
+    id: "safety-010",
+    domain: "safety",
+    subtopic: "Most-cited hazards",
+    difficulty: 1,
+    stem: "Which hazard category is consistently the most frequently cited in construction?",
+    options: ["Fall protection", "Office ergonomics", "Parking lot striping", "Break-room signage"],
+    answerIndex: 0,
+    explanation:
+      "Fall protection is consistently the most-cited construction standard, which is why the 6-foot trigger and proper fall systems are emphasized so heavily.",
+    citation: "OSHA most-cited standards",
+    tags: ["fall protection"],
+  },
+  {
+    id: "safety-011",
+    domain: "safety",
+    subtopic: "Excavation competent person",
+    difficulty: 3,
+    stem: "A crew is digging a 6-foot-deep trench for a footing. What does OSHA require regarding cave-in protection?",
+    options: [
+      "Nothing under 10 feet deep",
+      "A competent person must evaluate the trench and, generally at 5 feet or deeper, provide a protective system (sloping, shoring, or shielding) unless in stable rock",
+      "Only a warning sign at the edge",
+      "Protection only if the soil is visibly wet",
+    ],
+    answerIndex: 1,
+    explanation:
+      "Trenches 5 feet or deeper generally require a protective system — sloping/benching, shoring, or a trench box — unless excavated entirely in stable rock, and a competent person must inspect daily. A 6-foot trench is well within that requirement.",
+    citation: "29 CFR 1926 Subpart P — Excavations",
+    tags: ["excavation"],
+  },
+  {
+    id: "safety-012",
+    domain: "safety",
+    subtopic: "Employer safety duty",
+    difficulty: 1,
+    stem: "What is the employer's fundamental duty under Oregon safety law?",
+    options: [
+      "To provide a workplace free from recognized serious hazards",
+      "To eliminate all paperwork",
+      "To guarantee no employee ever quits",
+      "To pay overtime regardless of hours",
+    ],
+    answerIndex: 0,
+    explanation:
+      "The general duty is to furnish a place of employment free from recognized hazards likely to cause death or serious physical harm, and to comply with applicable safety standards.",
+    citation: "Oregon Safe Employment Act / general duty",
+    tags: ["general duty"],
+  },
+];

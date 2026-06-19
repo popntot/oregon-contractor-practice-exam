@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/*
+ * This tool has its own calm, focused identity — a deep teal "study desk at
+ * night" palette, independent of any other project's branding.
+ */
+@theme {
+  --color-ink: #0b1f26;
+  --color-slate: #0f2b33;
+  --color-card: #143842;
+  --color-card-2: #18454f;
+  --color-line: #235460;
+  --color-fog: #cfe3e6;
+  --color-fog-soft: #8fb3b9;
+  --color-teal: #2bb6c4;
+  --color-teal-deep: #0f3d4a;
+  --color-good: #34d399;
+  --color-bad: #fb7185;
+  --color-warn: #fcd34d;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-fog);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* Respect notches / home indicators on phones. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}

@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+# This workflow builds the app (at the repository ROOT) into a static bundle
+# and publishes it to GitHub Pages.
+#
+# ONE-TIME SETUP: in the new repo, go to Settings → Pages → Build and deployment
+# → Source: "GitHub Actions". (Public repo = free.) After that, every push to
+# main builds and deploys automatically; the live URL appears in the run's
+# "deploy" job and under Settings → Pages.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+      - run: npm ci
+      - run: npm run build
+        env:
+          # project site -> base "/oregon-contractor-practice-exam/"; empty for a user/org site.
+          VITE_BASE: ${{ steps.pages.outputs.base_path }}/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
