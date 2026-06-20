@@ -8,7 +8,7 @@ import { Results } from "./Results";
 import { MockExam } from "./MockExam";
 import { questions, questionCountByDomain } from "../content";
 import { computeAllProfiles } from "../engine/profile";
-import { emptyProgress } from "../types";
+import { emptyProgress, type Attempt, type Progress } from "../types";
 
 /**
  * Smoke tests: server-render each screen with real props and confirm it
@@ -45,17 +45,38 @@ describe("screens render", () => {
     expect(html).toContain("6 ft"); // safety note present
   });
 
-  it("Stats", () => {
+  it("Stats — empty state nudges practice", () => {
     const html = renderToStaticMarkup(
       <Stats
         profiles={profiles}
         progress={progress}
         counts={questionCountByDomain}
         onBack={noop}
+        onStart={noop}
       />,
     );
     expect(html).toContain("Your stats");
+    expect(html).toContain("No practice logged yet");
+  });
+
+  it("Stats — with data ranks weak areas", () => {
+    const attempts: Attempt[] = [
+      { questionId: "liens-001", domain: "liens", difficulty: 2, chosenIndex: 0, correct: false, at: 1_700_000_000_000, mode: "adaptive" },
+      { questionId: "laws-001", domain: "laws", difficulty: 1, chosenIndex: 1, correct: true, at: 1_700_000_000_000, mode: "adaptive" },
+    ];
+    const withData: Progress = { version: 1, attempts, srCards: {}, updatedAt: 1_700_000_000_000 };
+    const html = renderToStaticMarkup(
+      <Stats
+        profiles={computeAllProfiles(attempts)}
+        progress={withData}
+        counts={questionCountByDomain}
+        onBack={noop}
+        onStart={noop}
+      />,
+    );
     expect(html).toContain("accuracy");
+    expect(html).toContain("Focus areas");
+    expect(html).toContain("Lien Law");
   });
 
   it("Session", () => {

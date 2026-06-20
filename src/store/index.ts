@@ -14,18 +14,63 @@ import {
  */
 const KEY = "ccb-progress-v1";
 
+/**
+ * Persistence is resilient by design: we mirror progress to localStorage AND
+ * IndexedDB. Some mobile/PWA contexts (private mode, iOS standalone quirks) can
+ * silently fail IndexedDB; the localStorage mirror means progress — and the
+ * stats built from it — survive instead of vanishing on reload.
+ */
+function writeLocal(p: Progress): void {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(p));
+  } catch {
+    // localStorage unavailable too (rare) — nothing more we can do here.
+  }
+}
+
+function readLocal(): Progress | null {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Progress;
+    return parsed && parsed.version === 1 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function loadProgress(): Promise<Progress> {
-  const stored = await get<Progress>(KEY);
-  if (stored && stored.version === 1) return stored;
-  return emptyProgress();
+  try {
+    const stored = await get<Progress>(KEY);
+    if (stored && stored.version === 1) return stored;
+  } catch {
+    // IndexedDB unavailable — fall back to the localStorage mirror below.
+  }
+  return readLocal() ?? emptyProgress();
 }
 
 export async function saveProgress(p: Progress): Promise<void> {
-  await set(KEY, { ...p, updatedAt: Date.now() });
+  const blob = { ...p, updatedAt: Date.now() };
+  // Mirror synchronously first so progress is never lost if IndexedDB throws.
+  writeLocal(blob);
+  try {
+    await set(KEY, blob);
+  } catch {
+    // Already mirrored to localStorage above.
+  }
 }
 
 export async function resetProgress(): Promise<void> {
-  await del(KEY);
+  try {
+    await del(KEY);
+  } catch {
+    // ignore
+  }
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    // ignore
+  }
 }
 
 /**

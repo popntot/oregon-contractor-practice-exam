@@ -147,6 +147,7 @@ export default function App() {
           progress={progress}
           counts={questionCountByDomain}
           onBack={() => setRoute({ name: "home" })}
+          onStart={start}
         />
       );
     default:
