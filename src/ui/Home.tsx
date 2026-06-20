@@ -16,6 +16,7 @@ export function Home({
   profiles,
   counts,
   dueCount,
+  masteredCount = 0,
   totalQuestions,
   onStart,
   onNotes,
@@ -26,6 +27,7 @@ export function Home({
   profiles: DomainProfile[];
   counts: Partial<Record<DomainId, number>>;
   dueCount: number;
+  masteredCount?: number;
   totalQuestions: number;
   onStart: (mode: SessionMode, domain?: DomainId) => void;
   onNotes: () => void;
@@ -156,7 +158,7 @@ export function Home({
 
       <details className="text-sm text-fog-soft">
         <summary className="cursor-pointer py-2">
-          Backup &amp; settings · {answered} answered · {totalQuestions} questions
+          Backup &amp; settings · {answered} answered · {masteredCount} mastered · {totalQuestions} questions
         </summary>
         <div className="mt-2 flex flex-col gap-2">
           <Button variant="soft" onClick={doExport}>

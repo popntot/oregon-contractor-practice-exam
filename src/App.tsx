@@ -8,7 +8,7 @@ import { Results } from "./ui/Results";
 import { questions as ALL_QUESTIONS, questionCountByDomain } from "./content";
 import { selectQuestions } from "./engine/selection";
 import { computeAllProfiles } from "./engine/profile";
-import { dueCardIds } from "./engine/scheduler";
+import { dueCardIds, masteredIds } from "./engine/scheduler";
 import {
   applyAttempt,
   applyMockScore,
@@ -58,6 +58,10 @@ export default function App() {
   );
   const dueCount = useMemo(
     () => dueCardIds(progress.srCards, Date.now()).length,
+    [progress.srCards],
+  );
+  const masteredCount = useMemo(
+    () => masteredIds(progress.srCards).length,
     [progress.srCards],
   );
 
@@ -148,6 +152,7 @@ export default function App() {
           counts={questionCountByDomain}
           onBack={() => setRoute({ name: "home" })}
           onStart={start}
+          masteredCount={masteredCount}
         />
       );
     default:
@@ -157,6 +162,7 @@ export default function App() {
           profiles={profiles}
           counts={questionCountByDomain}
           dueCount={dueCount}
+          masteredCount={masteredCount}
           totalQuestions={ALL_QUESTIONS.length}
           onStart={start}
           onNotes={() => setRoute({ name: "notes" })}

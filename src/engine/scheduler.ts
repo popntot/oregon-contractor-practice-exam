@@ -57,3 +57,25 @@ export function dueCardIds(
     .sort((a, b) => a.dueAt - b.dueAt)
     .map((c) => c.questionId);
 }
+
+/**
+ * Mastery retirement. Once a card reaches the top Leitner box, the question has
+ * been answered correctly enough times in a row (a miss resets the box to 0)
+ * that we stop asking it in practice. It stays eligible for a full mock exam;
+ * missing it there resets the box and returns it to active rotation.
+ *
+ * MASTERY_BOX is the single knob: box N is reached after N consecutive correct
+ * answers, so the top box (4) means "answered correctly four times in a row."
+ * Lower it to retire questions sooner.
+ */
+export const MASTERY_BOX = MAX_BOX;
+
+export function isMastered(card: SrCard | undefined): boolean {
+  return card !== undefined && card.box >= MASTERY_BOX;
+}
+
+export function masteredIds(srCards: Record<string, SrCard>): string[] {
+  return Object.values(srCards)
+    .filter((c) => c.box >= MASTERY_BOX)
+    .map((c) => c.questionId);
+}

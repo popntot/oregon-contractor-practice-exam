@@ -19,12 +19,14 @@ export function Stats({
   counts,
   onBack,
   onStart,
+  masteredCount = 0,
 }: {
   profiles: DomainProfile[];
   progress: Progress;
   counts: Partial<Record<DomainId, number>>;
   onBack: () => void;
   onStart: (mode: SessionMode, domain?: DomainId) => void;
+  masteredCount?: number;
 }) {
   const covered = profiles.filter((p) => (counts[p.domain] ?? 0) > 0);
   const answered = progress.attempts.length;
@@ -103,6 +105,13 @@ export function Stats({
               <p className="text-xs text-fog-soft">best mock</p>
             </Card>
           </div>
+
+          {masteredCount > 0 && (
+            <p className="mb-5 -mt-2 text-center text-xs text-fog-soft">
+              🎓 {masteredCount} question{masteredCount === 1 ? "" : "s"} mastered
+              and retired from practice — miss one in a mock and it returns.
+            </p>
+          )}
 
           {weakest && (
             <button

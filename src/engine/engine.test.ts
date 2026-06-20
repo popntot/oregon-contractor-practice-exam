@@ -5,7 +5,15 @@ import {
   unlockedTier,
   updateRating,
 } from "./ability";
-import { BOX_INTERVAL_MS, dueCardIds, isDue, schedule } from "./scheduler";
+import {
+  BOX_INTERVAL_MS,
+  dueCardIds,
+  isDue,
+  isMastered,
+  MASTERY_BOX,
+  masteredIds,
+  schedule,
+} from "./scheduler";
 import { selectQuestions } from "./selection";
 import { computeDomainProfile, isExamReady, overallReadiness } from "./profile";
 import { mulberry32 } from "./rng";
@@ -58,6 +66,19 @@ describe("spaced repetition", () => {
     };
     expect(isDue(cards.c, now)).toBe(false);
     expect(dueCardIds(cards, now)).toEqual(["b", "a"]);
+  });
+
+  it("marks a card mastered only at the top box", () => {
+    const mk = (box: number, id = "x"): SrCard => ({
+      questionId: id,
+      box,
+      lastSeen: 0,
+      dueAt: 0,
+    });
+    expect(isMastered(mk(MASTERY_BOX))).toBe(true);
+    expect(isMastered(mk(MASTERY_BOX - 1))).toBe(false);
+    expect(isMastered(undefined)).toBe(false);
+    expect(masteredIds({ a: mk(MASTERY_BOX, "a"), b: mk(0, "b") })).toEqual(["a"]);
   });
 });
 
@@ -173,6 +194,52 @@ describe("selection", () => {
     });
     const liensCount = out.filter((x) => x.domain === "liens").length;
     expect(liensCount).toBeGreaterThan(out.length / 2);
+  });
+
+  it("retires mastered questions from active practice", () => {
+    const now = Date.now();
+    const srCards: Record<string, SrCard> = {};
+    // Master 5 of the 6 liens questions; only liens5 stays active.
+    for (let i = 0; i < 5; i++) {
+      srCards[`liens${i}`] = {
+        questionId: `liens${i}`,
+        box: MASTERY_BOX,
+        lastSeen: now,
+        dueAt: now + 1,
+      };
+    }
+    const out = selectQuestions({
+      questions: bank,
+      attempts: [],
+      srCards,
+      mode: "drill",
+      domain: "liens",
+      count: 6,
+      rng: mulberry32(5),
+    });
+    expect(out.map((x) => x.id)).toEqual(["liens5"]);
+  });
+
+  it("keeps mastered questions eligible in a full mock", () => {
+    const now = Date.now();
+    const srCards: Record<string, SrCard> = {};
+    for (const b of bank) {
+      srCards[b.id] = {
+        questionId: b.id,
+        box: MASTERY_BOX,
+        lastSeen: now,
+        dueAt: now + 1,
+      };
+    }
+    const out = selectQuestions({
+      questions: bank,
+      attempts: [],
+      srCards,
+      mode: "mock",
+      count: 8,
+      rng: mulberry32(9),
+    });
+    expect(out).toHaveLength(8); // dress rehearsal draws from the full bank
   });
 });
 

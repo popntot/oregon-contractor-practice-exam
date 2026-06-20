@@ -1,5 +1,5 @@
 import { computeAllProfiles } from "./profile";
-import { dueCardIds } from "./scheduler";
+import { dueCardIds, masteredIds } from "./scheduler";
 import {
   DOMAIN_IDS,
   type Attempt,
@@ -57,6 +57,12 @@ export function selectQuestions(input: SelectionInput): Question[] {
   const seenIds = new Set(attempts.map((a) => a.questionId));
   const dueSet = new Set(dueCardIds(srCards, now));
 
+  // Mastery retirement: questions answered correctly enough times in a row drop
+  // out of active practice (still eligible in a full mock). Sessions then focus
+  // on what isn't locked in yet instead of re-asking what you already know.
+  const masteredSet = new Set(masteredIds(srCards));
+  const active = questions.filter((q) => !masteredSet.has(q.id));
+
   // Mock: a representative full-length exam — spread across all domains
   // proportional to bank coverage, mixed difficulty, shuffled. Repeats allowed
   // (it's a dress rehearsal, not adaptive practice).
@@ -67,17 +73,18 @@ export function selectQuestions(input: SelectionInput): Question[] {
   // Diagnostic: a fixed spread across all domains, easy→application, prefer
   // unseen, to establish a baseline fast.
   if (mode === "diagnostic") {
-    return diagnostic(questions, seenIds, count, rng);
+    return diagnostic(active, seenIds, count, rng);
   }
 
   // Review: only what's due, soonest first; backfill from weak domains.
   if (mode === "review") {
     const due = dueCardIds(srCards, now)
+      .filter((id) => !masteredSet.has(id))
       .map((id) => byId.get(id))
       .filter((q): q is Question => Boolean(q));
     if (due.length >= count) return due.slice(0, count);
     const backfill = pickAdaptive(
-      questions,
+      active,
       profileByDomain,
       recentIds,
       seenIds,
@@ -91,7 +98,7 @@ export function selectQuestions(input: SelectionInput): Question[] {
   }
 
   return pickAdaptive(
-    questions,
+    active,
     profileByDomain,
     recentIds,
     seenIds,
