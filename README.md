@@ -93,11 +93,14 @@ copyrighted question banks — and each is cited. A few figures change over time
 relying on them. This tool prepares for the **exam**; full licensure also
 requires a bond, liability insurance, and CCB registration.
 
-## Contributing
+## Contributing & roadmap
 
-Corrections and additional **cited** questions are welcome — especially more
-difficulty-3 scenario questions and updates to figures that have changed. Open a
-PR; the test suite enforces question integrity so bad data fails loudly.
+Corrections and additional **cited** questions are welcome — see
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) for the question format and the accuracy
+bar. The test suite enforces question integrity, so bad data fails loudly.
+
+The plan to grow this into a national, **multi-state** platform — and the
+options for **profiles/accounts** — is laid out in [`SCOPE.md`](./SCOPE.md).
 
 ## License
 
