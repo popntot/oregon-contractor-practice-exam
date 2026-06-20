@@ -51,9 +51,20 @@ It's a static PWA — nothing to host but files.
 - **Self-hosted:** `npm run build`, then serve `dist/` from any machine (e.g.
   `npx serve dist`) and reach it from your phone over your LAN or Tailscale.
 
-No accounts, no API keys, no database server, no recurring cost. Progress is
-stored on the device; use **Export progress** (on the home screen) to back it
-up or move it to another device.
+By default: no accounts, no API keys, no recurring cost. Progress is stored on
+the device; use **Export progress** (on the home screen) to back it up or move
+it to another device.
+
+## Optional accounts & sync
+
+You can optionally enable **passwordless email sign-in + cross-device sync**
+(study on your phone, review on a laptop) by connecting a free
+[Supabase](https://supabase.com) project: set `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_ANON_KEY` (repo **Variables** for the live build, or a local
+`.env` — see [`.env.example`](./.env.example)) and create a `progress` table with
+row-level security. The app stays fully usable **signed-out**; signing in just
+syncs your local progress up, merging across devices. Privacy details in
+[`PRIVACY.md`](./PRIVACY.md).
 
 ## How it adapts
 

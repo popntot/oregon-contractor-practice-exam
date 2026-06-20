@@ -38,6 +38,11 @@ jobs:
         env:
           # project site -> base "/oregon-contractor-practice-exam/"; empty for a user/org site.
           VITE_BASE: ${{ steps.pages.outputs.base_path }}/
+          # Optional cloud sync. Set these as repo Variables (Settings -> Secrets
+          # and variables -> Actions -> Variables) to enable accounts; if unset,
+          # the app builds local-only. Both are public-safe (RLS protects data).
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

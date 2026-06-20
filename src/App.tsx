@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Session, type SessionResult } from "./ui/Session";
 import { MockExam, type MockAnswer } from "./ui/MockExam";
 import { Home } from "./ui/Home";
@@ -13,8 +13,18 @@ import {
   applyAttempt,
   applyMockScore,
   loadProgress,
+  mergeProgress,
   saveProgress,
 } from "./store";
+import {
+  cloudEnabled,
+  getSession,
+  onAuthChange,
+  pullProgress,
+  pushProgress,
+  sendMagicLink,
+  signOut,
+} from "./lib/cloud";
 import {
   emptyProgress,
   MOCK_QUESTION_COUNT,
@@ -65,6 +75,80 @@ export default function App() {
     [progress.srCards],
   );
 
+  // --- optional cloud sync (entirely a no-op unless Supabase is configured) ---
+  const [email, setEmail] = useState<string | null>(null);
+  const [syncNote, setSyncNote] = useState<string>("");
+  const userIdRef = useRef<string | null>(null);
+  const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function connectSync(userId: string) {
+    setSyncNote("Syncing…");
+    try {
+      const [local, cloud] = await Promise.all([
+        loadProgress(),
+        pullProgress(userId),
+      ]);
+      const merged = cloud ? mergeProgress(local, cloud) : local;
+      await saveProgress(merged);
+      await pushProgress(userId, merged);
+      setProgress(merged);
+      setSyncNote("Synced ✓");
+    } catch {
+      setSyncNote("Sync failed — your progress is safe locally.");
+    }
+  }
+
+  useEffect(() => {
+    if (!cloudEnabled) return;
+    let active = true;
+    void getSession().then((s) => {
+      if (!active) return;
+      setEmail(s?.user.email ?? null);
+      userIdRef.current = s?.user.id ?? null;
+      if (s?.user.id) void connectSync(s.user.id);
+    });
+    const unsub = onAuthChange((s) => {
+      setEmail(s?.user.email ?? null);
+      userIdRef.current = s?.user.id ?? null;
+      if (s?.user.id) void connectSync(s.user.id);
+      else setSyncNote("");
+    });
+    return () => {
+      active = false;
+      unsub();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** Save locally, then (only if signed in) debounce a push to the cloud. */
+  function persist(p: Progress) {
+    void saveProgress(p);
+    const uid = userIdRef.current;
+    if (uid) {
+      if (pushTimer.current) clearTimeout(pushTimer.current);
+      pushTimer.current = setTimeout(() => {
+        void pushProgress(uid, p).catch(() => {});
+      }, 1500);
+    }
+  }
+
+  async function sendLink(addr: string) {
+    setSyncNote("Sending…");
+    try {
+      await sendMagicLink(addr);
+      setSyncNote("Check your email for a sign-in link.");
+    } catch {
+      setSyncNote("Couldn't send the link — try again.");
+    }
+  }
+
+  async function doSignOut() {
+    await signOut();
+    setEmail(null);
+    userIdRef.current = null;
+    setSyncNote("");
+  }
+
   function start(mode: SessionMode, domain?: DomainId) {
     const picked = selectQuestions({
       questions: ALL_QUESTIONS,
@@ -91,7 +175,7 @@ export default function App() {
         }
       }
       next = applyMockScore(next, score);
-      void saveProgress(next);
+      persist(next);
       return next;
     });
   }
@@ -100,7 +184,7 @@ export default function App() {
     return (q: Question, chosenIndex: number) => {
       setProgress((prev) => {
         const nextP = applyAttempt(prev, q, chosenIndex, mode);
-        void saveProgress(nextP);
+        persist(nextP);
         return nextP;
       });
     };
@@ -169,8 +253,13 @@ export default function App() {
           onStats={() => setRoute({ name: "stats" })}
           onProgressChange={(p) => {
             setProgress(p);
-            void saveProgress(p);
+            persist(p);
           }}
+          account={
+            cloudEnabled
+              ? { email, syncNote, onSendLink: sendLink, onSignOut: doSignOut }
+              : undefined
+          }
         />
       );
   }

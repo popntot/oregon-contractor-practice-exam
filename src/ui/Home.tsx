@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button, Card, ReadinessBar, Screen } from "./components";
 import { isExamReady, overallReadiness } from "../engine/profile";
 import { exportJson, importJson, resetProgress } from "../store";
@@ -22,6 +22,7 @@ export function Home({
   onNotes,
   onStats,
   onProgressChange,
+  account,
 }: {
   progress: Progress;
   profiles: DomainProfile[];
@@ -33,8 +34,15 @@ export function Home({
   onNotes: () => void;
   onStats: () => void;
   onProgressChange: (p: Progress) => void;
+  account?: {
+    email: string | null;
+    syncNote: string;
+    onSendLink: (email: string) => void;
+    onSignOut: () => void;
+  };
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [emailInput, setEmailInput] = useState("");
   // Only domains with authored questions are live this wave; basing readiness
   // on covered domains keeps the score honest until the bank fills out.
   const covered = profiles.filter((p) => (counts[p.domain] ?? 0) > 0);
@@ -161,6 +169,57 @@ export function Home({
           Backup &amp; settings · {answered} answered · {masteredCount} mastered · {totalQuestions} questions
         </summary>
         <div className="mt-2 flex flex-col gap-2">
+          {account && (
+            <div className="rounded-2xl border border-line bg-card p-3">
+              {account.email ? (
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-fog">{account.email}</p>
+                    <p className="text-xs text-good">Synced across your devices</p>
+                  </div>
+                  <button
+                    onClick={account.onSignOut}
+                    className="shrink-0 text-sm text-fog-soft hover:text-fog"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <p className="mb-1 text-sm font-semibold text-fog">
+                    Sync across devices
+                  </p>
+                  <p className="mb-2 text-xs leading-relaxed text-fog-soft">
+                    Optional. Sign in with your email to back up progress and pick
+                    it up on any device — nothing leaves this device until you do.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="you@email.com"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      className="min-w-0 flex-1 rounded-xl border border-line bg-card-2 px-3 py-2 text-sm text-fog placeholder:text-fog-soft"
+                    />
+                    <Button
+                      variant="soft"
+                      onClick={() =>
+                        emailInput.includes("@") &&
+                        account.onSendLink(emailInput.trim())
+                      }
+                    >
+                      Send link
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {account.syncNote && (
+                <p className="mt-2 text-xs text-fog-soft">{account.syncNote}</p>
+              )}
+            </div>
+          )}
           <Button variant="soft" onClick={doExport}>
             Export progress
           </Button>

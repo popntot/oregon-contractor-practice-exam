@@ -5,6 +5,7 @@ import {
   type Attempt,
   type Progress,
   type Question,
+  type SrCard,
 } from "../types";
 
 /**
@@ -122,4 +123,42 @@ export function importJson(text: string): Progress {
     throw new Error("Not a valid CCB Study backup file.");
   }
   return parsed;
+}
+
+/**
+ * Merge two progress blobs (e.g. this device + the cloud) into one. Attempts are
+ * an append-only log, so we union and de-duplicate them; each SR card keeps the
+ * most recently seen state; bestMock keeps the higher score. Used on sign-in so
+ * progress from multiple devices combines instead of one clobbering the other.
+ */
+export function mergeProgress(a: Progress, b: Progress): Progress {
+  const seen = new Set<string>();
+  const attempts: Attempt[] = [];
+  for (const at of [...a.attempts, ...b.attempts].sort((x, y) => x.at - y.at)) {
+    const key = `${at.questionId}@${at.at}@${at.mode}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    attempts.push(at);
+  }
+
+  const srCards: Record<string, SrCard> = { ...a.srCards };
+  for (const [id, card] of Object.entries(b.srCards)) {
+    const cur = srCards[id];
+    if (!cur || card.lastSeen > cur.lastSeen) srCards[id] = card;
+  }
+
+  const bestMock =
+    a.bestMock === undefined
+      ? b.bestMock
+      : b.bestMock === undefined
+        ? a.bestMock
+        : Math.max(a.bestMock, b.bestMock);
+
+  return {
+    version: 1,
+    attempts,
+    srCards,
+    bestMock,
+    updatedAt: Math.max(a.updatedAt, b.updatedAt),
+  };
 }
